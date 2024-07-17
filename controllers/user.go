@@ -74,3 +74,8 @@ func (u UserController) Login(c *gin.Context) {
 		Token:        token}
 	ReturnSuccess(c, 0, "登录成功", data)
 }
+
+func (u UserController) LogOut(c *gin.Context) {
+	token := c.GetHeader("token")
+	modules.SetTokenOutLog(token)
+}

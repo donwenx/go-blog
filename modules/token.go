@@ -26,3 +26,15 @@ func CreateToken(userId int64, expire int64) (string, error) {
 	err := dao.Db.Create(&token).Error
 	return token.Token, err
 }
+
+// 查找token信息
+func GetTokenInfo(tokenStr string) (Token, error) {
+	token := Token{}
+	err := dao.Db.Where("token = ?", tokenStr).First(&token).Error
+	return token, err
+}
+
+// 设置token过期
+func SetTokenOutLog(token string) {
+	dao.Db.Model(&Token{}).Where("token = ?", token).UpdateColumn("state", 0)
+}

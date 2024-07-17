@@ -13,6 +13,7 @@ func Router() *gin.Engine {
 	{
 		user.POST("/register", controllers.UserController{}.Register)
 		user.POST("/login", controllers.UserController{}.Login)
+		user.POST("/logout", controllers.UserController{}.LogOut)
 	}
 	return router
 }
