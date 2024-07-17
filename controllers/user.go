@@ -21,14 +21,18 @@ func (u UserController) Register(c *gin.Context) {
 	}
 
 	// 注册user
-	_, err = modules.AddUser(username, EncryMd5(password))
+	_, err = modules.AddUser(&modules.AddUserDto{
+		Username: username,
+		Password: Md5(password),
+	})
+
 	if err != nil {
 		ReturnError(c, 4001, "用户注册失败")
 	}
 	ReturnSuccess(c, 0, "注册成功", "")
 }
 
-type UserApi struct {
+type LoginResponse struct {
 	Id           int64  `json:"id"`
 	Username     string `json:"username"`
 	Authority    string `json:"authority"`
@@ -52,7 +56,7 @@ func (u UserController) Login(c *gin.Context) {
 		ReturnError(c, 4001, "用户名或密码不正确")
 		return
 	}
-	if user.Password != EncryMd5(password) {
+	if user.Password != Md5(password) {
 		ReturnError(c, 4001, "用户名或密码不正确")
 		return
 	}
@@ -62,7 +66,7 @@ func (u UserController) Login(c *gin.Context) {
 	}
 	// 存入token
 	token, _ := modules.CreateToken(user.Id, 24*60*60)
-	data := UserApi{
+	data := LoginResponse{
 		Id:           user.Id,
 		Username:     username,
 		Authority:    user.Authority,
@@ -71,11 +75,16 @@ func (u UserController) Login(c *gin.Context) {
 		AllowLogin:   user.AllowLogin,
 		CreateTime:   user.CreateTime,
 		UpdateTime:   user.UpdateTime,
-		Token:        token}
+		Token:        token,
+	}
 	ReturnSuccess(c, 0, "登录成功", data)
 }
 
 func (u UserController) LogOut(c *gin.Context) {
 	token := c.GetHeader("token")
 	modules.SetTokenOutLog(token)
+}
+
+func (u UserController) UpdateUser(c *gin.Context) {
+
 }
