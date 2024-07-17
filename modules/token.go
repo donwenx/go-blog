@@ -20,7 +20,9 @@ func TableName() string {
 }
 
 func CreateToken(userId int64, expire int64) (string, error) {
-	token := Token{Uid: userId, CreateTime: time.Now().Unix(), Expire: expire, Token: util.CreateNonceStr(32), State: 1}
+	createTime := time.Now().Unix()
+	time := createTime + expire
+	token := Token{Uid: userId, CreateTime: createTime, Expire: time, Token: util.CreateNonceStr(32), State: 1}
 	err := dao.Db.Create(&token).Error
 	return token.Token, err
 }

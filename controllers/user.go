@@ -31,7 +31,6 @@ func (u UserController) Register(c *gin.Context) {
 type UserApi struct {
 	Id           int64  `json:"id"`
 	Username     string `json:"username"`
-	Password     string `json:"password"`
 	Authority    string `json:"authority"`
 	AllowPost    int    `json:"allowPost"`
 	AllowComment int    `json:"allowComment"`
