@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"blog/errcode"
-	"blog/modules"
+	"blog/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +18,12 @@ func (c CategoryController) CreateCategory(ctx *gin.Context) {
 		return
 	}
 	// 创建前判断是否已存在
-	category, _ := modules.GetCategoryByName(name)
+	category, _ := model.GetCategoryByName(name)
 	if category.Id != 0 {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "名称已存在")
 		return
 	}
-	_, err := modules.CreateCategory(&modules.CreateCategoryDto{
+	_, err := model.CreateCategory(&model.CreateCategoryDto{
 		Name: name,
 	})
 	if err != nil {
@@ -42,7 +42,7 @@ func (c CategoryController) GetCategoryById(ctx *gin.Context) {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "请输入正确信息")
 		return
 	}
-	category, err := modules.GetCategoryById(id)
+	category, err := model.GetCategoryById(id)
 	if err != nil {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "获取失败")
 		return
@@ -52,7 +52,7 @@ func (c CategoryController) GetCategoryById(ctx *gin.Context) {
 
 // 获取列表
 func (c CategoryController) GetCateGoryList(ctx *gin.Context) {
-	category, err := modules.GetCateGoryList()
+	category, err := model.GetCateGoryList()
 	if err != nil {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "查询失败")
 		return
@@ -71,13 +71,13 @@ func (c CategoryController) UpdateCategory(ctx *gin.Context) {
 		return
 	}
 	// 判断分类是否存在
-	category, _ := modules.GetCategoryByName(name)
+	category, _ := model.GetCategoryByName(name)
 	if category.Id != 0 {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "分类已存在")
 		return
 	}
 	// 更新数据库
-	category, err := modules.UpdateCategory(&modules.UpdateCategoryDto{
+	category, err := model.UpdateCategory(&model.UpdateCategoryDto{
 		Id:   id,
 		Name: name,
 	})
@@ -96,12 +96,12 @@ func (c CategoryController) DeleteCategory(ctx *gin.Context) {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "请输入正确信息")
 		return
 	}
-	category, _ := modules.GetCategoryById(id)
+	category, _ := model.GetCategoryById(id)
 	if category.State == 0 {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "分类已删除")
 		return
 	}
-	category, err := modules.UpdateCategory(&modules.UpdateCategoryDto{
+	category, err := model.UpdateCategory(&model.UpdateCategoryDto{
 		Id:    id,
 		State: 0,
 	})

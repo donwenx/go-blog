@@ -2,12 +2,12 @@ package main
 
 import (
 	"blog/dao"
-	"blog/modules"
+	"blog/model"
 	"blog/router"
 )
 
 func main() {
 	router := router.Router()
-	dao.Db.AutoMigrate(modules.User{}, modules.Token{}, modules.Category{}) // 自动创建目录
+	dao.Db.AutoMigrate(model.User{}, model.Token{}, model.Category{}) // 自动创建目录
 	router.Run("127.0.0.1:8080")
 }

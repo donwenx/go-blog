@@ -2,42 +2,10 @@ package router
 
 import (
 	"blog/controllers"
-	err_code "blog/errcode"
-	"blog/modules"
-	"time"
+	"blog/middleware"
 
 	"github.com/gin-gonic/gin"
 )
-
-func ValidateToken(ctx *gin.Context) {
-	tokenStr := ctx.GetHeader("token")
-	if tokenStr == "" {
-		controllers.ReturnError(ctx, err_code.ErrInvalidRequest, "user not login")
-		ctx.Abort()
-		return
-	}
-
-	token, err := modules.GetTokenInfo(tokenStr)
-	if err != nil {
-		controllers.ReturnError(ctx, err_code.ErrInvalidRequest, err.Error())
-		ctx.Abort()
-		return
-	}
-
-	if token.Expire < time.Now().Unix() {
-		controllers.ReturnError(ctx, err_code.ErrInvalidToken, "token expired")
-		ctx.Abort()
-		return
-	}
-
-	if token.State == 0 {
-		controllers.ReturnError(ctx, err_code.ErrInvalidToken, "token expired")
-		ctx.Abort()
-		return
-	}
-
-	ctx.Next()
-}
 
 func Router() *gin.Engine {
 	router := gin.Default()
@@ -46,16 +14,20 @@ func Router() *gin.Engine {
 	{
 		user.POST("/register", controllers.UserController{}.Register)
 		user.POST("/login", controllers.UserController{}.Login)
-		user.POST("/logout", ValidateToken, controllers.UserController{}.LogOut)
+		user.POST("/logout", middleware.ValidateToken, controllers.UserController{}.LogOut)
+		user.POST("/update", middleware.ValidateToken, controllers.UserController{}.UpdateUser)
+		user.GET(":id", middleware.ValidateToken, controllers.UserController{}.GetUserById)
+		user.GET("/list", middleware.ValidateToken, controllers.UserController{}.GetUserList)
+		user.DELETE(":id", middleware.ValidateToken, controllers.UserController{}.DeleteUser)
 	}
 
 	category := router.Group("/category")
 	{
-		category.POST("/create", ValidateToken, controllers.CategoryController{}.CreateCategory)
-		category.POST("/update", ValidateToken, controllers.CategoryController{}.UpdateCategory)
-		category.GET(":id", ValidateToken, controllers.CategoryController{}.GetCategoryById)
-		category.GET("/list", ValidateToken, controllers.CategoryController{}.GetCateGoryList)
-		category.DELETE(":id", ValidateToken, controllers.CategoryController{}.DeleteCategory)
+		category.POST("/create", middleware.ValidateToken, controllers.CategoryController{}.CreateCategory)
+		category.POST("/update", middleware.ValidateToken, controllers.CategoryController{}.UpdateCategory)
+		category.GET(":id", middleware.ValidateToken, controllers.CategoryController{}.GetCategoryById)
+		category.GET("/list", middleware.ValidateToken, controllers.CategoryController{}.GetCateGoryList)
+		category.DELETE(":id", middleware.ValidateToken, controllers.CategoryController{}.DeleteCategory)
 	}
 	return router
 }

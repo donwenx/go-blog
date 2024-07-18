@@ -1,9 +1,12 @@
-package modules
+package model
 
 import (
 	"blog/dao"
 	"time"
 )
+
+const Invalid = 2
+const Valid = 1
 
 type User struct {
 	Id           int64  `json:"id"`
@@ -26,7 +29,10 @@ type AddUserDto struct {
 
 type UpdateUserDto struct {
 	Id       int64  `json:"id"`
+	Avatar   string `json:"avatar"`
+	Username string `json:"username"`
 	Password string `json:"password"`
+	State    int    `json:"state"`
 }
 
 func (User) TableName() string {
@@ -36,6 +42,18 @@ func (User) TableName() string {
 func GetUserInfoByUserName(username string) (User, error) {
 	var user User
 	err := dao.Db.Where("username = ?", username).First(&user).Error
+	return user, err
+}
+
+func GetUserInfoById(id int64) (User, error) {
+	var user User
+	err := dao.Db.Where("id = ?", id).First(&user).Error
+	return user, err
+}
+
+func GetUserList() ([]User, error) {
+	var user []User
+	err := dao.Db.Find(&user).Error
 	return user, err
 }
 
@@ -52,9 +70,13 @@ func AddUser(data *AddUserDto) (int64, error) {
 	return user.Id, err
 }
 
-func UpdateUser(data *UpdateUserDto) error {
-	err := dao.Db.Model(User{Id: data.Id}).Updates(User{
+func UpdateUser(data *UpdateUserDto) (User, error) {
+	user := User{Id: data.Id}
+	err := dao.Db.Model(&user).Updates(User{
 		Password: data.Password,
+		Avatar:   data.Avatar,
+		Username: data.Username,
+		State:    data.State,
 	}).Error
-	return err
+	return user, err
 }

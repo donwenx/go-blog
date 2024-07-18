@@ -1,9 +1,12 @@
-package modules
+package model
 
 import (
 	"blog/dao"
 	"time"
 )
+
+// modules -> 模块
+// model -> 模型
 
 type Category struct {
 	Id         int64  `json:"id"`

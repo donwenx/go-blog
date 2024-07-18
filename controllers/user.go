@@ -1,7 +1,9 @@
 package controllers
 
 import (
-	"blog/modules"
+	"blog/errcode"
+	"blog/model"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,14 +17,14 @@ func (u UserController) Register(c *gin.Context) {
 		ReturnError(c, 4001, "请输入正确信息")
 		return
 	}
-	user, err := modules.GetUserInfoByUserName(username)
+	user, _ := model.GetUserInfoByUserName(username)
 	if user.Id != 0 {
 		ReturnError(c, 4001, "用户名已存在")
 		return
 	}
 
 	// 注册user
-	_, err = modules.AddUser(&modules.AddUserDto{
+	_, err := model.AddUser(&model.AddUserDto{
 		Username: username,
 		Password: Md5(password),
 	})
@@ -53,7 +55,7 @@ func (u UserController) Login(c *gin.Context) {
 		ReturnError(c, 4001, "请输入正确信息")
 		return
 	}
-	user, _ := modules.GetUserInfoByUserName(username)
+	user, _ := model.GetUserInfoByUserName(username)
 	if user.Id == 0 {
 		ReturnError(c, 4001, "用户名或密码不正确")
 		return
@@ -67,7 +69,7 @@ func (u UserController) Login(c *gin.Context) {
 		return
 	}
 	// 存入token
-	token, _ := modules.CreateToken(user.Id, 24*60*60)
+	token, _ := model.CreateToken(user.Id, 24*60*60)
 	data := LoginResponse{
 		Id:           user.Id,
 		Username:     username,
@@ -84,9 +86,80 @@ func (u UserController) Login(c *gin.Context) {
 
 func (u UserController) LogOut(c *gin.Context) {
 	token := c.GetHeader("token")
-	modules.SetTokenOutLog(token)
+	model.SetTokenOutLog(token)
+}
+
+func (u UserController) GetUserById(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	if id == 0 {
+		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
+		return
+	}
+	user, err := model.GetUserInfoById(id)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "用户不存在")
+		return
+	}
+	ReturnSuccess(c, 0, "查询成功", user)
+}
+
+func (u UserController) GetUserList(c *gin.Context) {
+	user, err := model.GetUserList()
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "查询失败")
+		return
+	}
+	ReturnSuccess(c, 0, "查询成功", user)
 }
 
 func (u UserController) UpdateUser(c *gin.Context) {
+	idStr := c.DefaultPostForm("id", "0")
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	username := c.DefaultPostForm("username", "")
+	avatar := c.DefaultPostForm("avatar", "")
+	if id == 0 {
+		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
+		return
+	}
 
+	user, _ := model.GetUserInfoById(id)
+	if user.Id == 0 {
+		ReturnError(c, errcode.ErrInvalidRequest, "用户不存在")
+		return
+	}
+	// 更新数据库
+	user, err := model.UpdateUser(&model.UpdateUserDto{
+		Id:       id,
+		Username: username,
+		Avatar:   avatar,
+	})
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "更新失败")
+		return
+	}
+	ReturnSuccess(c, 0, "更新成功", user)
+}
+
+func (u UserController) DeleteUser(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	if id == 0 {
+		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
+		return
+	}
+	user, _ := model.GetUserInfoById(id)
+	if user.Id == 0 || user.State == model.Invalid {
+		ReturnError(c, errcode.ErrInvalidRequest, "用户不存在")
+		return
+	}
+	user, err := model.UpdateUser(&model.UpdateUserDto{
+		Id:    id,
+		State: 0,
+	})
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "删除失败")
+		return
+	}
+	ReturnSuccess(c, 0, "删除成功", "")
 }
