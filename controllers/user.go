@@ -18,6 +18,7 @@ func (u UserController) Register(c *gin.Context) {
 	user, err := modules.GetUserInfoByUserName(username)
 	if user.Id != 0 {
 		ReturnError(c, 4001, "用户名已存在")
+		return
 	}
 
 	// 注册user
@@ -28,6 +29,7 @@ func (u UserController) Register(c *gin.Context) {
 
 	if err != nil {
 		ReturnError(c, 4001, "用户注册失败")
+		return
 	}
 	ReturnSuccess(c, 0, "注册成功", "")
 }
