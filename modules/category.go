@@ -52,9 +52,9 @@ func GetCateGoryList() ([]Category, error) {
 
 func UpdateCategory(data *UpdateCategoryDto) (Category, error) {
 	category := Category{Id: data.Id}
-	err := dao.Db.Model(&category).Updates(Category{
-		Name:  data.Name,
-		State: data.State,
+	err := dao.Db.Model(&category).Updates(map[string]interface{}{
+		"name":  data.Name,
+		"state": data.State,
 	}).Error
 	return category, err
 }

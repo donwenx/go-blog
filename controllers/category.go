@@ -33,6 +33,33 @@ func (c CategoryController) CreateCategory(ctx *gin.Context) {
 	ReturnSuccess(ctx, 0, "创建成功", "")
 }
 
+// 获取1个，根据id查找
+func (c CategoryController) GetCategoryById(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	// 判断id是否存在
+	if id == 0 {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "请输入正确信息")
+		return
+	}
+	category, err := modules.GetCategoryById(id)
+	if err != nil {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "获取失败")
+		return
+	}
+	ReturnSuccess(ctx, 0, "查询成功", category)
+}
+
+// 获取列表
+func (c CategoryController) GetCateGoryList(ctx *gin.Context) {
+	category, err := modules.GetCateGoryList()
+	if err != nil {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "查询失败")
+		return
+	}
+	ReturnSuccess(ctx, 0, "查询成功", category)
+}
+
 // 更新
 func (c CategoryController) UpdateCategory(ctx *gin.Context) {
 	idStr := ctx.DefaultPostForm("id", "0")
@@ -64,29 +91,26 @@ func (c CategoryController) UpdateCategory(ctx *gin.Context) {
 	ReturnSuccess(ctx, 0, "更新成功", category)
 }
 
-// 获取1个，根据id查找
-func (c CategoryController) GetCategoryById(ctx *gin.Context) {
+// 删除
+func (c CategoryController) DeleteCategory(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, _ := strconv.ParseInt(idStr, 10, 64)
-	// 判断id是否存在
 	if id == 0 {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "请输入正确信息")
 		return
 	}
-	category, err := modules.GetCategoryById(id)
-	if err != nil {
-		ReturnError(ctx, errcode.ErrInvalidRequest, "获取失败")
+	category, _ := modules.GetCategoryById(id)
+	if category.State == 0 {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "分类已删除")
 		return
 	}
-	ReturnSuccess(ctx, 0, "查询成功", category)
-}
-
-// 获取列表
-func (c CategoryController) GetCateGoryList(ctx *gin.Context) {
-	category, err := modules.GetCateGoryList()
+	category, err := modules.UpdateCategory(&modules.UpdateCategoryDto{
+		Id:    id,
+		State: 0,
+	})
 	if err != nil {
-		ReturnError(ctx, errcode.ErrInvalidRequest, "查询失败")
+		ReturnError(ctx, errcode.ErrInvalidRequest, "删除失败")
 		return
 	}
-	ReturnSuccess(ctx, 0, "查询成功", category)
+	ReturnSuccess(ctx, 0, "删除成功", "")
 }
