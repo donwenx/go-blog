@@ -10,6 +10,7 @@ import (
 
 type CategoryController struct{}
 
+// 创建
 func (c CategoryController) CreateCategory(ctx *gin.Context) {
 	name := ctx.DefaultPostForm("name", "")
 	if name == "" {
@@ -32,6 +33,7 @@ func (c CategoryController) CreateCategory(ctx *gin.Context) {
 	ReturnSuccess(ctx, 0, "创建成功", "")
 }
 
+// 更新
 func (c CategoryController) UpdateCategory(ctx *gin.Context) {
 	idStr := ctx.DefaultPostForm("id", "0")
 	id, _ := strconv.ParseInt(idStr, 10, 64)
@@ -61,6 +63,8 @@ func (c CategoryController) UpdateCategory(ctx *gin.Context) {
 	}
 	ReturnSuccess(ctx, 0, "更新成功", category)
 }
+
+// 获取1个，根据id查找
 func (c CategoryController) GetCategoryById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, _ := strconv.ParseInt(idStr, 10, 64)
@@ -74,5 +78,15 @@ func (c CategoryController) GetCategoryById(ctx *gin.Context) {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "获取失败")
 		return
 	}
-	ReturnSuccess(ctx, 0, "获取成功", category)
+	ReturnSuccess(ctx, 0, "查询成功", category)
+}
+
+// 获取列表
+func (c CategoryController) GetCateGoryList(ctx *gin.Context) {
+	category, err := modules.GetCateGoryList()
+	if err != nil {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "查询失败")
+		return
+	}
+	ReturnSuccess(ctx, 0, "查询成功", category)
 }

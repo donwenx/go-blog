@@ -44,6 +44,12 @@ func GetCategoryById(id int64) (Category, error) {
 	return category, err
 }
 
+func GetCateGoryList() ([]Category, error) {
+	var category []Category
+	err := dao.Db.Find(&category).Error
+	return category, err
+}
+
 func UpdateCategory(data *UpdateCategoryDto) (Category, error) {
 	category := Category{Id: data.Id}
 	err := dao.Db.Model(&category).Updates(Category{

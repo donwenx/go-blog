@@ -54,6 +54,7 @@ func Router() *gin.Engine {
 		category.POST("/create", ValidateToken, controllers.CategoryController{}.CreateCategory)
 		category.POST("/update", ValidateToken, controllers.CategoryController{}.UpdateCategory)
 		category.GET(":id", ValidateToken, controllers.CategoryController{}.GetCategoryById)
+		category.GET("/list", ValidateToken, controllers.CategoryController{}.GetCateGoryList)
 	}
 	return router
 }
