@@ -1,3 +1,21 @@
+## 启动
+
+- 配置数据库
+
+```js
+// config/db.go
+// 在数据库中，建立一个blog数据库
+// root:root意为：账号：密码
+const (
+	Mysql = "root:root@tcp(127.0.0.1:3306)/blog?charset=utf8"
+)
+```
+
+```js
+// 启动
+go run main.go
+```
+
 ## token 字符串
 
 - 生成一个随机字符串
