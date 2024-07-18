@@ -65,8 +65,6 @@ func (c CategoryController) UpdateCategory(ctx *gin.Context) {
 	idStr := ctx.DefaultPostForm("id", "0")
 	id, _ := strconv.ParseInt(idStr, 10, 64)
 	name := ctx.DefaultPostForm("name", "")
-	stateStr := ctx.DefaultPostForm("state", "1")
-	state, _ := strconv.Atoi(stateStr)
 
 	if id == 0 || name == "" {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "请输入正确信息")
@@ -80,9 +78,8 @@ func (c CategoryController) UpdateCategory(ctx *gin.Context) {
 	}
 	// 更新数据库
 	category, err := modules.UpdateCategory(&modules.UpdateCategoryDto{
-		Id:    id,
-		Name:  name,
-		State: state,
+		Id:   id,
+		Name: name,
 	})
 	if err != nil {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "更新失败")
