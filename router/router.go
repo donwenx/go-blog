@@ -27,6 +27,11 @@ func ValidateToken(ctx *gin.Context) {
 		return
 	}
 
+	if token.State == 0 {
+		controllers.ReturnError(ctx, err_code.ErrInvalidToken, "token expired")
+		return
+	}
+
 	ctx.Next()
 }
 
