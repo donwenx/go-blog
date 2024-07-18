@@ -19,6 +19,16 @@ type User struct {
 	State        int    `json:"state"`
 }
 
+type AddUserDto struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type UpdateUserDto struct {
+	Id       int64  `json:"id"`
+	Password string `json:"password"`
+}
+
 func (User) TableName() string {
 	return "user"
 }
@@ -27,11 +37,6 @@ func GetUserInfoByUserName(username string) (User, error) {
 	var user User
 	err := dao.Db.Where("username = ?", username).First(&user).Error
 	return user, err
-}
-
-type AddUserDto struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
 }
 
 func AddUser(data *AddUserDto) (int64, error) {
@@ -52,9 +57,4 @@ func UpdateUser(data *UpdateUserDto) error {
 		Password: data.Password,
 	}).Error
 	return err
-}
-
-type UpdateUserDto struct {
-	Id       int64  `json:"id"`
-	Password string `json:"password"`
 }
