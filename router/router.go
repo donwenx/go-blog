@@ -34,7 +34,9 @@ func Router() *gin.Engine {
 	{
 		article.POST("/create", middleware.ValidateToken, controllers.ArticleController{}.CreateArticle)
 		article.GET(":id", middleware.ValidateToken, controllers.ArticleController{}.GetArticleById)
+		article.GET("/search", middleware.ValidateToken, controllers.ArticleController{}.GetArticleByKeyword)
 		article.GET("/list", middleware.ValidateToken, controllers.ArticleController{}.GetArticleList)
+		article.POST("/update", middleware.ValidateToken, controllers.ArticleController{}.UpdateArticle)
 	}
 	return router
 }
