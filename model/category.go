@@ -37,19 +37,19 @@ func CreateCategory(data *CreateCategoryDto) (Category, error) {
 
 func GetCategoryByName(name string) (Category, error) {
 	category := Category{Name: name}
-	err := dao.Db.Where("name = ?", name).First(&category).Error
+	err := dao.Db.Where("name = ? AND state = ?", name, Valid).First(&category).Error
 	return category, err
 }
 
 func GetCategoryById(id int64) (Category, error) {
 	var category Category
-	err := dao.Db.Where("id = ?", id).Find(&category).Error
+	err := dao.Db.Where("id = ? AND state = ?", id, Valid).Find(&category).Error
 	return category, err
 }
 
 func GetCateGoryList() ([]Category, error) {
 	var category []Category
-	err := dao.Db.Find(&category).Error
+	err := dao.Db.Where("state = ?", Valid).Find(&category).Error
 	return category, err
 }
 

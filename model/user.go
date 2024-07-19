@@ -38,19 +38,19 @@ func (User) TableName() string {
 
 func GetUserInfoByUserName(username string) (User, error) {
 	var user User
-	err := dao.Db.Where("username = ?", username).First(&user).Error
+	err := dao.Db.Where("username = ? AND state = ?", username, Valid).First(&user).Error
 	return user, err
 }
 
 func GetUserInfoById(id int64) (User, error) {
 	var user User
-	err := dao.Db.Where("id = ?", id).First(&user).Error
+	err := dao.Db.Where("id = ? AND state = ?", id, Valid).First(&user).Error
 	return user, err
 }
 
 func GetUserList() ([]User, error) {
 	var user []User
-	err := dao.Db.Find(&user).Error
+	err := dao.Db.Where("state = ?", Valid).Find(&user).Error
 	return user, err
 }
 

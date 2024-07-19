@@ -30,7 +30,7 @@ func CreateToken(userId int64, expire int64) (string, error) {
 // 查找token信息
 func GetTokenInfo(tokenStr string) (Token, error) {
 	token := Token{}
-	err := dao.Db.Where("token = ?", tokenStr).First(&token).Error
+	err := dao.Db.Where("token = ? AND state = ?", tokenStr, Valid).First(&token).Error
 	return token, err
 }
 
