@@ -39,5 +39,11 @@ func Router() *gin.Engine {
 		article.POST("/update", middleware.ValidateToken, controllers.ArticleController{}.UpdateArticle)
 		article.DELETE(":id", middleware.ValidateToken, controllers.ArticleController{}.DeleteArticle)
 	}
+
+	comment := router.Group("/comment")
+	{
+		comment.POST("/create", middleware.ValidateToken, controllers.CommentController{}.CreateComment)
+		comment.DELETE(":id", middleware.ValidateToken, controllers.CommentController{}.DeleteComment)
+	}
 	return router
 }
