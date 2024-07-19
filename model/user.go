@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-const Invalid = 2
-const Valid = 1
-
 type User struct {
 	Id           int64  `json:"id"`
 	Avatar       string `json:"avatar"`
@@ -61,10 +58,10 @@ func AddUser(data *AddUserDto) (int64, error) {
 	user := User{
 		Username:  data.Username,
 		Password:  data.Password,
-		AllowPost: 1, AllowComment: 1, AllowLogin: 1,
+		AllowPost: Valid, AllowComment: Valid, AllowLogin: Valid,
 		CreateTime: time.Now().Unix(),
 		UpdateTime: time.Now().Unix(),
-		State:      1,
+		State:      Valid,
 	}
 	err := dao.Db.Create(&user).Error
 	return user.Id, err
@@ -78,5 +75,6 @@ func UpdateUser(data *UpdateUserDto) (User, error) {
 		Username: data.Username,
 		State:    data.State,
 	}).Error
+	user, _ = GetUserInfoById(user.Id)
 	return user, err
 }

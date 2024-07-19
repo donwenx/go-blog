@@ -78,3 +78,42 @@ func ValidateToken(ctx *gin.Context) {
 }
 
 ```
+
+## 错误小提示
+
+### 1、map 导致错误
+
+- 使用 map 来赋值会导致每个都进行赋值
+
+```go
+func UpdateCategory(data *UpdateCategoryDto) (Category, error) {
+	category := Category{Id: data.Id}
+	err := dao.Db.Model(&category).Updates(map[string]interface{}{
+			"name":  data.Name,
+			"state": data.State,
+		}).Error
+	return category, err
+}
+```
+
+- 修改成这样还是遇到了问题，state 不更新
+- 例如 state 0 为表示空，这个时候认为 0 是没状态的，就不会进行更新
+
+```go
+func UpdateCategory(data *UpdateCategoryDto) (Category, error) {
+	category := Category{Id: data.Id}
+	err := dao.Db.Model(&category).Updates(Category{
+		Name:  data.Name,
+		State: data.State,
+	}).Error
+	category, _ = GetCategoryById(category.Id)
+	return category, err
+}
+```
+
+- 解决是用 2 代替没状态
+
+```go
+const Invalid = 2
+const Valid = 1
+```

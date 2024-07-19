@@ -22,7 +22,7 @@ func TableName() string {
 func CreateToken(userId int64, expire int64) (string, error) {
 	createTime := time.Now().Unix()
 	time := createTime + expire
-	token := Token{Uid: userId, CreateTime: createTime, Expire: time, Token: util.CreateNonceStr(32), State: 1}
+	token := Token{Uid: userId, CreateTime: createTime, Expire: time, Token: util.CreateNonceStr(32), State: Valid}
 	err := dao.Db.Create(&token).Error
 	return token.Token, err
 }
@@ -36,5 +36,5 @@ func GetTokenInfo(tokenStr string) (Token, error) {
 
 // 设置token过期
 func SetTokenOutLog(token string) {
-	dao.Db.Model(&Token{}).Where("token = ?", token).UpdateColumn("state", 0)
+	dao.Db.Model(&Token{}).Where("token = ?", token).UpdateColumn("state", Invalid)
 }

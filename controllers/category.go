@@ -97,13 +97,13 @@ func (c CategoryController) DeleteCategory(ctx *gin.Context) {
 		return
 	}
 	category, _ := model.GetCategoryById(id)
-	if category.State == 0 {
+	if category.State == model.Invalid {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "分类已删除")
 		return
 	}
 	category, err := model.UpdateCategory(&model.UpdateCategoryDto{
 		Id:    id,
-		State: 0,
+		State: model.Invalid,
 	})
 	if err != nil {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "删除失败")

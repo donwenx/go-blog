@@ -64,7 +64,7 @@ func (u UserController) Login(c *gin.Context) {
 		ReturnError(c, 4001, "用户名或密码不正确")
 		return
 	}
-	if user.AllowLogin != 1 {
+	if user.AllowLogin != model.Valid {
 		ReturnError(c, 4001, "用户禁止登录")
 		return
 	}
@@ -155,7 +155,7 @@ func (u UserController) DeleteUser(c *gin.Context) {
 	}
 	user, err := model.UpdateUser(&model.UpdateUserDto{
 		Id:    id,
-		State: 0,
+		State: model.Invalid,
 	})
 	if err != nil {
 		ReturnError(c, errcode.ErrInvalidRequest, "删除失败")
