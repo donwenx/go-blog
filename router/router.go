@@ -37,6 +37,7 @@ func Router() *gin.Engine {
 		article.GET("/search", middleware.ValidateToken, controllers.ArticleController{}.GetArticleByKeyword)
 		article.GET("/list", middleware.ValidateToken, controllers.ArticleController{}.GetArticleList)
 		article.POST("/update", middleware.ValidateToken, controllers.ArticleController{}.UpdateArticle)
+		article.DELETE(":id", middleware.ValidateToken, controllers.ArticleController{}.DeleteArticle)
 	}
 	return router
 }

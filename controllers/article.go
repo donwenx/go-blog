@@ -112,3 +112,25 @@ func (a ArticleController) UpdateArticle(c *gin.Context) {
 }
 
 // 删除
+func (a ArticleController) DeleteArticle(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	if id == 0 {
+		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
+		return
+	}
+	article, _ := model.GetArticleById(id)
+	if article.Id == 0 || article.State == model.Invalid {
+		ReturnError(c, errcode.ErrInvalidRequest, "文章不存在")
+		return
+	}
+	article, err := model.UpdateArticle(&model.UpdateArticleDto{
+		Id:    id,
+		State: model.Invalid,
+	})
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "删除失败")
+		return
+	}
+	ReturnSuccess(c, 0, "删除成功", "")
+}

@@ -91,5 +91,3 @@ func UpdateArticle(data *UpdateArticleDto) (Article, error) {
 	article, _ = GetArticleById(article.Id)
 	return article, err
 }
-
-// 删除
