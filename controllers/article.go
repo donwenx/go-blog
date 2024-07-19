@@ -38,6 +38,30 @@ func (a ArticleController) CreateArticle(c *gin.Context) {
 }
 
 // 查找id
+func (a ArticleController) GetArticleById(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	if id == 0 {
+		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
+		return
+	}
+	article, err := model.GetArticleById(id)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "查找失败")
+		return
+	}
+	ReturnSuccess(c, 0, "查找成功", article)
+}
+
 // 查找列表
+func (a ArticleController) GetArticleList(c *gin.Context) {
+	article, err := model.GetArticleList()
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "查找失败")
+		return
+	}
+	ReturnSuccess(c, 0, "查找成功", article)
+}
+
 // 更新
 // 删除

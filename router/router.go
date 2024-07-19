@@ -33,6 +33,8 @@ func Router() *gin.Engine {
 	article := router.Group("/article")
 	{
 		article.POST("/create", middleware.ValidateToken, controllers.ArticleController{}.CreateArticle)
+		article.GET(":id", middleware.ValidateToken, controllers.ArticleController{}.GetArticleById)
+		article.GET("/list", middleware.ValidateToken, controllers.ArticleController{}.GetArticleList)
 	}
 	return router
 }

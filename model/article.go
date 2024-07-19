@@ -46,3 +46,21 @@ func CreateArticle(data *CreateArticleDto) (Article, error) {
 	err := dao.Db.Create(&article).Error
 	return article, err
 }
+
+func GetArticleByTittle(title string) (Article, error) {
+	article := Article{Title: title}
+	err := dao.Db.Where("tittle = ? AND state = ?", title, Valid).First(&article).Error
+	return article, err
+}
+
+func GetArticleById(id int64) (Article, error) {
+	var article Article
+	err := dao.Db.Where("id = ? AND state = ?", id, Valid).Find(&article).Error
+	return article, err
+}
+
+func GetArticleList() ([]Article, error) {
+	var article []Article
+	err := dao.Db.Where("state = ?", Valid).Find(&article).Error
+	return article, err
+}
