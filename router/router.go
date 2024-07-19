@@ -29,5 +29,10 @@ func Router() *gin.Engine {
 		category.GET("/list", middleware.ValidateToken, controllers.CategoryController{}.GetCateGoryList)
 		category.DELETE(":id", middleware.ValidateToken, controllers.CategoryController{}.DeleteCategory)
 	}
+
+	article := router.Group("/article")
+	{
+		article.POST("/create", middleware.ValidateToken, controllers.ArticleController{}.CreateArticle)
+	}
 	return router
 }

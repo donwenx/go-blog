@@ -15,7 +15,7 @@ type Token struct {
 	State      int64  `json:"state"`
 }
 
-func TableName() string {
+func (Token) TableName() string {
 	return "token"
 }
 
