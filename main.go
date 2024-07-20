@@ -8,6 +8,6 @@ import (
 
 func main() {
 	router := router.Router()
-	dao.Db.AutoMigrate(model.User{}, model.Token{}, model.Category{}, model.Article{}, model.Comment{}) // 自动创建目录
+	dao.Db.AutoMigrate(model.User{}, model.Token{}, model.Category{}, model.Article{}, model.Comment{}, model.Tag{}) // 自动创建目录
 	router.Run("127.0.0.1:8080")
 }

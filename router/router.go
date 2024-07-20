@@ -45,5 +45,11 @@ func Router() *gin.Engine {
 		comment.POST("/create", middleware.ValidateToken, controllers.CommentController{}.CreateComment)
 		comment.DELETE(":id", middleware.ValidateToken, controllers.CommentController{}.DeleteComment)
 	}
+
+	tag := router.Group("/tag")
+	{
+		ctr := new(controllers.TagController)
+		tag.POST("/create", middleware.ValidateToken, ctr.CreateTag)
+	}
 	return router
 }
