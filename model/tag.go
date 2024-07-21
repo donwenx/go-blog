@@ -19,6 +19,12 @@ type CreateTagDto struct {
 	Uid  int64  `json:"uid" form:"uid"`
 }
 
+type UpdateTagDto struct {
+	Id    int64  `json:"id"  form:"id" binding:"required"`
+	Name  string `json:"name"  form:"name"`
+	State int    `json:"state"  form:"state"`
+}
+
 func (Tag) TableName() string {
 	return "tag"
 }
@@ -47,8 +53,19 @@ func GetTagById(id int64) (Tag, error) {
 	return tag, err
 }
 
-func GetTagList(id int64) ([]Tag, error) {
+func GetTagList() ([]Tag, error) {
 	tag := []Tag{}
-	err := dao.Db.Where("id = ? AND state = ?", id, Valid).Find(&tag).Error
+	err := dao.Db.Find(&tag).Error
+	return tag, err
+}
+
+func UpdateTag(data *UpdateTagDto) (Tag, error) {
+	tag := Tag{
+		Name:       data.Name,
+		UpdateTime: time.Now().Unix(),
+		State:      data.State,
+	}
+	err := dao.Db.Where("id = ?", data.Id).Updates(&tag).Error
+	tag, _ = GetTagById(data.Id)
 	return tag, err
 }

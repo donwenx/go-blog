@@ -50,6 +50,9 @@ func Router() *gin.Engine {
 	{
 		ctr := new(controllers.TagController)
 		tag.POST("/create", middleware.ValidateToken, ctr.CreateTag)
+		tag.GET("/list", middleware.ValidateToken, ctr.GetTagList)
+		tag.POST("/update", middleware.ValidateToken, ctr.UpdateTag)
+		tag.DELETE(":id", middleware.ValidateToken, ctr.DeleteTag)
 	}
 	return router
 }
