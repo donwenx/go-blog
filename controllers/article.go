@@ -10,31 +10,100 @@ import (
 
 type ArticleController struct{}
 
+type CreateArticleRequest struct {
+	Uid     int64   `json:"uid" binding:"required"`
+	Cid     int64   `json:"cid" binding:"required"`
+	Title   string  `json:"title" binding:"required"`
+	Cover   string  `json:"cover" binding:"required"`
+	Content string  `json:"content" binding:"required"`
+	TagId   []int64 `json:"tagId"`
+}
+
+type Category struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+type User struct {
+	Id        int64  `json:"id"`
+	Avatar    string `json:"avatar"`
+	Username  string `json:"username"`
+	Authority string `json:"authority"`
+}
+
+type Tag struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+type ArticleResponse struct {
+	User     User     `json:"user"`
+	Category Category `json:"category"`
+	Title    string   `json:"title"`
+	Cover    string   `json:"cover"`
+	Content  string   `json:"context"`
+	Tag      []Tag    `json:"tag"`
+}
+
 // 创建
 func (a ArticleController) CreateArticle(c *gin.Context) {
-	uidStr := c.DefaultPostForm("uid", "0")
-	cidStr := c.DefaultPostForm("cid", "0")
-	uid, _ := strconv.ParseInt(uidStr, 10, 64)
-	cid, _ := strconv.ParseInt(cidStr, 10, 64)
-	title := c.DefaultPostForm("title", "")
-	cover := c.DefaultPostForm("cover", "")
-	content := c.DefaultPostForm("content", "")
-	if uid == 0 || cid == 0 || title == "" || cover == "" || content == "" {
-		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
+	param := CreateArticleRequest{}
+	err := c.ShouldBind(&param)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "绑定失败"+err.Error())
 		return
 	}
 	article, err := model.CreateArticle(&model.CreateArticleDto{
-		Uid:     uid,
-		Cid:     cid,
-		Title:   title,
-		Cover:   cover,
-		Content: content,
+		Uid:     param.Uid,
+		Cid:     param.Cid,
+		Title:   param.Title,
+		Cover:   param.Cover,
+		Content: param.Content,
 	})
 	if err != nil {
 		ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
 		return
 	}
-	ReturnSuccess(c, 0, "创建成功", article)
+	for k, _ := range param.TagId {
+		_, err := model.CreateTagRelation(&model.CreateTagRelationDto{
+			ArticleId: article.Id,
+			TagId:     param.TagId[k],
+		})
+
+		if err != nil {
+			ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+			return
+		}
+	}
+	// 查文章
+	article, _ = model.GetArticleById(article.Id)
+	// 查用户
+	user, _ := model.GetUserInfoById(param.Uid)
+	// 查分类
+	category, _ := model.GetCategoryById(param.Cid)
+	// 查tag
+	tagRelation, _ := model.GetTagRelationByArticleId(article.Id)
+	tag := make([]model.Tag, len(tagRelation))
+	for k := range tagRelation {
+		tag[k], _ = model.GetTagById(tagRelation[k].TagId)
+	}
+
+	userResp := User{Id: user.Id, Avatar: user.Avatar, Username: user.Username, Authority: user.Authority}
+	categoryResp := Category{Id: category.Id, Name: category.Name}
+	tagResp := make([]Tag, len(tag))
+	for k := range tag {
+		tagResp[k] = Tag{Id: tag[k].Id, Name: tag[k].Name}
+	}
+
+	response := ArticleResponse{
+		User:     userResp,
+		Category: categoryResp,
+		Title:    article.Title,
+		Cover:    article.Cover,
+		Content:  article.Content,
+		Tag:      tagResp,
+	}
+	ReturnSuccess(c, 0, "创建成功", response)
 }
 
 // 查找id
