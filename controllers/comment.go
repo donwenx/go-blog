@@ -11,23 +11,14 @@ import (
 type CommentController struct{}
 
 func (CommentController) CreateComment(ctx *gin.Context) {
-	uidStr := ctx.DefaultPostForm("uid", "0")
-	aidStr := ctx.DefaultPostForm("aid", "0")
-	parentIdStr := ctx.DefaultPostForm("parentId", "0")
-	uid, _ := strconv.ParseInt(uidStr, 10, 64)
-	aid, _ := strconv.ParseInt(aidStr, 10, 64)
-	parentId, _ := strconv.ParseInt(parentIdStr, 10, 64)
-	context := ctx.DefaultPostForm("context", "")
-	if uid == 0 || aid == 0 || context == "" {
-		ReturnError(ctx, errcode.ErrInvalidRequest, "请输入正确信息")
+	param := model.CreateCommentDto{}
+	err := ctx.ShouldBind(&param)
+	if err != nil {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "绑定失败"+err.Error())
 		return
 	}
-	comment, err := model.CreateComment(&model.CreateCommentDto{
-		Uid:      uid,
-		Aid:      aid,
-		Content:  context,
-		ParentId: parentId,
-	})
+
+	comment, err := model.CreateComment(&param)
 	if err != nil {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "创建失败")
 		return

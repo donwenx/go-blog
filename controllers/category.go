@@ -25,9 +25,7 @@ func (c CategoryController) CreateCategory(ctx *gin.Context) {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "名称已存在")
 		return
 	}
-	category, err = model.CreateCategory(&model.CreateCategoryDto{
-		Name: param.Name,
-	})
+	category, err = model.CreateCategory(&param)
 	if err != nil {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "创建失败")
 		return

@@ -16,10 +16,6 @@ func (t TagController) CreateTag(c *gin.Context) {
 		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
 		return
 	}
-	if param.Name == "" || param.Uid == model.Invalid {
-		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
-		return
-	}
 	tag, _ := model.GetTagByName(param.Name)
 	if tag.Id != 0 {
 		ReturnError(c, errcode.ErrInvalidRequest, "名字已存在")
@@ -50,10 +46,6 @@ type UpdateTagRequest struct {
 func (t TagController) UpdateTag(c *gin.Context) {
 	param := UpdateTagRequest{}
 	err := c.ShouldBind(&param)
-	if param.Name == "" || param.Id == 0 {
-		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息"+err.Error())
-		return
-	}
 	if err != nil {
 		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息:"+err.Error())
 		return

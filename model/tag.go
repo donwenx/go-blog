@@ -15,8 +15,8 @@ type Tag struct {
 }
 
 type CreateTagDto struct {
-	Name string `json:"name" form:"name"`
-	Uid  int64  `json:"uid" form:"uid"`
+	Name string `json:"name" form:"name" binding:"required"`
+	Uid  int64  `json:"uid" form:"uid" binding:"required"`
 }
 
 type UpdateTagDto struct {

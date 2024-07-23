@@ -18,14 +18,14 @@ type Comment struct {
 }
 
 type CreateCommentDto struct {
-	Uid      int64  `json:"uid"`
-	Aid      int64  `json:"Aid"`
-	ParentId int64  `json:"parentId"`
-	Content  string `json:"context"`
+	Uid      int64  `json:"uid" binding:"required"`
+	Aid      int64  `json:"Aid" binding:"required"`
+	ParentId int64  `json:"parentId" binding:"required"`
+	Content  string `json:"context" binding:"required"`
 }
 
 type UpdateCommentDto struct {
-	Id         int64 `json:"id"`
+	Id         int64 `json:"id" binding:"required"`
 	UpdateTime int64 `json:"updateTime"`
 	State      int   `json:"state"`
 }
