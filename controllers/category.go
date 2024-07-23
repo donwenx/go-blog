@@ -12,25 +12,27 @@ type CategoryController struct{}
 
 // 创建
 func (c CategoryController) CreateCategory(ctx *gin.Context) {
-	name := ctx.DefaultPostForm("name", "")
-	if name == "" {
-		ReturnError(ctx, errcode.ErrInvalidRequest, "请输入正确信息")
+	param := model.CreateCategoryDto{}
+	err := ctx.ShouldBind(&param)
+	if err != nil {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "绑定失败"+err.Error())
 		return
 	}
+
 	// 创建前判断是否已存在
-	category, _ := model.GetCategoryByName(name)
+	category, _ := model.GetCategoryByName(param.Name)
 	if category.Id != 0 {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "名称已存在")
 		return
 	}
-	_, err := model.CreateCategory(&model.CreateCategoryDto{
-		Name: name,
+	category, err = model.CreateCategory(&model.CreateCategoryDto{
+		Name: param.Name,
 	})
 	if err != nil {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "创建失败")
 		return
 	}
-	ReturnSuccess(ctx, 0, "创建成功", "")
+	ReturnSuccess(ctx, 0, "创建成功", category)
 }
 
 // 获取1个，根据id查找
@@ -62,24 +64,23 @@ func (c CategoryController) GetCateGoryList(ctx *gin.Context) {
 
 // 更新
 func (c CategoryController) UpdateCategory(ctx *gin.Context) {
-	idStr := ctx.DefaultPostForm("id", "0")
-	id, _ := strconv.ParseInt(idStr, 10, 64)
-	name := ctx.DefaultPostForm("name", "")
-
-	if id == 0 || name == "" {
-		ReturnError(ctx, errcode.ErrInvalidRequest, "请输入正确信息")
+	param := model.UpdateCategoryDto{}
+	err := ctx.ShouldBind(&param)
+	if err != nil {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "绑定失败"+err.Error())
 		return
 	}
+
 	// 判断分类是否存在
-	category, _ := model.GetCategoryByName(name)
-	if category.Id != 0 {
-		ReturnError(ctx, errcode.ErrInvalidRequest, "分类已存在")
+	category, _ := model.GetCategoryById(param.Id)
+	if category.Id == 0 {
+		ReturnError(ctx, errcode.ErrInvalidRequest, "分类不存在")
 		return
 	}
 	// 更新数据库
-	category, err := model.UpdateCategory(&model.UpdateCategoryDto{
-		Id:   id,
-		Name: name,
+	category, err = model.UpdateCategory(&model.UpdateCategoryDto{
+		Id:   param.Id,
+		Name: param.Name,
 	})
 	if err != nil {
 		ReturnError(ctx, errcode.ErrInvalidRequest, "更新失败")

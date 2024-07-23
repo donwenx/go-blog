@@ -12,15 +12,16 @@ type Category struct {
 	Id         int64  `json:"id"`
 	Name       string `json:"name"`
 	CreateTime int64  `json:"createTime"`
+	UpdateTime int64  `json:"updateTime"`
 	State      int    `json:"state"`
 }
 
 type CreateCategoryDto struct {
-	Name string `json:"name"`
+	Name string `json:"name" binding:"required"`
 }
 
 type UpdateCategoryDto struct {
-	Id    int64  `json:"id"`
+	Id    int64  `json:"id" binding:"required"`
 	Name  string `json:"name"`
 	State int    `json:"state"`
 }
@@ -30,7 +31,7 @@ func (Category) TableName() string {
 }
 
 func CreateCategory(data *CreateCategoryDto) (Category, error) {
-	category := Category{Name: data.Name, CreateTime: time.Now().Unix(), State: Valid}
+	category := Category{Name: data.Name, CreateTime: time.Now().Unix(), UpdateTime: time.Now().Unix(), State: Valid}
 	err := dao.Db.Create(&category).Error
 	return category, err
 }
@@ -56,8 +57,9 @@ func GetCateGoryList() ([]Category, error) {
 func UpdateCategory(data *UpdateCategoryDto) (Category, error) {
 	category := Category{Id: data.Id}
 	err := dao.Db.Model(&category).Updates(Category{
-		Name:  data.Name,
-		State: data.State,
+		Name:       data.Name,
+		UpdateTime: time.Now().Unix(),
+		State:      data.State,
 	}).Error
 	category, _ = GetCategoryById(category.Id)
 	return category, err
