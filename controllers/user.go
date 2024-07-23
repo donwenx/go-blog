@@ -10,30 +10,56 @@ import (
 
 type UserController struct{}
 
+type UserResponse struct {
+	Id           int64  `json:"id"`
+	Avatar       string `json:"avatar"`
+	Username     string `json:"username"`
+	Authority    string `json:"authority"`
+	AllowPost    int    `json:"allowPost"`
+	AllowComment int    `json:"allowComment"`
+	AllowLogin   int    `json:"allowLogin"`
+	CreateTime   int64  `json:"createTime"`
+	UpdateTime   int64  `json:"updateTime"`
+	State        int    `json:"state"`
+}
+
 func (u UserController) Register(c *gin.Context) {
-	username := c.DefaultPostForm("username", "")
-	password := c.DefaultPostForm("password", "")
-	if username == "" || password == "" {
-		ReturnError(c, 4001, "请输入正确信息")
+	param := model.CreateUserDto{}
+	err := c.ShouldBind(&param)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "绑定失败"+err.Error())
 		return
 	}
-	user, _ := model.GetUserInfoByUserName(username)
+	user, _ := model.GetUserInfoByUserName(param.Username)
 	if user.Id != 0 {
 		ReturnError(c, 4001, "用户名已存在")
 		return
 	}
 
 	// 注册user
-	_, err := model.AddUser(&model.AddUserDto{
-		Username: username,
-		Password: Md5(password),
+	user, err = model.CreateUser(&model.CreateUserDto{
+		Username: param.Username,
+		Password: Md5(param.Password),
 	})
 
 	if err != nil {
 		ReturnError(c, 4001, "用户注册失败")
 		return
 	}
-	ReturnSuccess(c, 0, "注册成功", "")
+
+	response := UserResponse{
+		Id:           user.Id,
+		Avatar:       user.Avatar,
+		Username:     user.Username,
+		Authority:    user.Authority,
+		AllowPost:    user.AllowPost,
+		AllowComment: user.AllowComment,
+		AllowLogin:   user.AllowLogin,
+		CreateTime:   user.CreateTime,
+		UpdateTime:   user.UpdateTime,
+		State:        user.State,
+	}
+	ReturnSuccess(c, 0, "注册成功", response)
 }
 
 type LoginResponse struct {
@@ -49,18 +75,18 @@ type LoginResponse struct {
 }
 
 func (u UserController) Login(c *gin.Context) {
-	username := c.DefaultPostForm("username", "")
-	password := c.DefaultPostForm("password", "")
-	if username == "" || password == "" {
-		ReturnError(c, 4001, "请输入正确信息")
+	param := model.CreateUserDto{}
+	err := c.ShouldBind(&param)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "绑定失败"+err.Error())
 		return
 	}
-	user, _ := model.GetUserInfoByUserName(username)
+	user, _ := model.GetUserInfoByUserName(param.Username)
 	if user.Id == 0 {
 		ReturnError(c, 4001, "用户名或密码不正确")
 		return
 	}
-	if user.Password != Md5(password) {
+	if user.Password != Md5(param.Password) {
 		ReturnError(c, 4001, "用户名或密码不正确")
 		return
 	}
@@ -70,9 +96,9 @@ func (u UserController) Login(c *gin.Context) {
 	}
 	// 存入token
 	token, _ := model.CreateToken(user.Id, 24*60*60)
-	data := LoginResponse{
+	response := LoginResponse{
 		Id:           user.Id,
-		Username:     username,
+		Username:     param.Username,
 		Authority:    user.Authority,
 		AllowPost:    user.AllowPost,
 		AllowComment: user.AllowComment,
@@ -81,7 +107,7 @@ func (u UserController) Login(c *gin.Context) {
 		UpdateTime:   user.UpdateTime,
 		Token:        token,
 	}
-	ReturnSuccess(c, 0, "登录成功", data)
+	ReturnSuccess(c, 0, "登录成功", response)
 }
 
 func (u UserController) LogOut(c *gin.Context) {
@@ -114,31 +140,41 @@ func (u UserController) GetUserList(c *gin.Context) {
 }
 
 func (u UserController) UpdateUser(c *gin.Context) {
-	idStr := c.DefaultPostForm("id", "0")
-	id, _ := strconv.ParseInt(idStr, 10, 64)
-	username := c.DefaultPostForm("username", "")
-	avatar := c.DefaultPostForm("avatar", "")
-	if id == 0 {
-		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
+	param := model.UpdateUserDto{}
+	err := c.ShouldBind(&param)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "绑定失败"+err.Error())
 		return
 	}
 
-	user, _ := model.GetUserInfoById(id)
+	user, _ := model.GetUserInfoById(param.Id)
 	if user.Id == 0 {
 		ReturnError(c, errcode.ErrInvalidRequest, "用户不存在")
 		return
 	}
 	// 更新数据库
-	user, err := model.UpdateUser(&model.UpdateUserDto{
-		Id:       id,
-		Username: username,
-		Avatar:   avatar,
+	user, err = model.UpdateUser(&model.UpdateUserDto{
+		Id:       param.Id,
+		Username: param.Username,
+		Avatar:   param.Avatar,
 	})
 	if err != nil {
 		ReturnError(c, errcode.ErrInvalidRequest, "更新失败")
 		return
 	}
-	ReturnSuccess(c, 0, "更新成功", user)
+	response := UserResponse{
+		Id:           user.Id,
+		Avatar:       user.Avatar,
+		Username:     user.Username,
+		Authority:    user.Authority,
+		AllowPost:    user.AllowPost,
+		AllowComment: user.AllowComment,
+		AllowLogin:   user.AllowLogin,
+		CreateTime:   user.CreateTime,
+		UpdateTime:   user.UpdateTime,
+		State:        user.State,
+	}
+	ReturnSuccess(c, 0, "更新成功", response)
 }
 
 func (u UserController) DeleteUser(c *gin.Context) {

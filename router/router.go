@@ -12,38 +12,42 @@ func Router() *gin.Engine {
 
 	user := router.Group("/user")
 	{
-		user.POST("/register", controllers.UserController{}.Register)
-		user.POST("/login", controllers.UserController{}.Login)
-		user.POST("/logout", middleware.ValidateToken, controllers.UserController{}.LogOut)
-		user.POST("/update", middleware.ValidateToken, controllers.UserController{}.UpdateUser)
-		user.GET(":id", middleware.ValidateToken, controllers.UserController{}.GetUserById)
-		user.GET("/list", middleware.ValidateToken, controllers.UserController{}.GetUserList)
-		user.DELETE(":id", middleware.ValidateToken, controllers.UserController{}.DeleteUser)
+		ctr := new(controllers.UserController)
+		user.POST("/register", ctr.Register)
+		user.POST("/login", ctr.Login)
+		user.POST("/logout", middleware.ValidateToken, ctr.LogOut)
+		user.POST("/update", middleware.ValidateToken, ctr.UpdateUser)
+		user.GET(":id", middleware.ValidateToken, ctr.GetUserById)
+		user.GET("/list", middleware.ValidateToken, ctr.GetUserList)
+		user.DELETE(":id", middleware.ValidateToken, ctr.DeleteUser)
 	}
 
 	category := router.Group("/category")
 	{
-		category.POST("/create", middleware.ValidateToken, controllers.CategoryController{}.CreateCategory)
-		category.POST("/update", middleware.ValidateToken, controllers.CategoryController{}.UpdateCategory)
-		category.GET(":id", middleware.ValidateToken, controllers.CategoryController{}.GetCategoryById)
-		category.GET("/list", middleware.ValidateToken, controllers.CategoryController{}.GetCateGoryList)
-		category.DELETE(":id", middleware.ValidateToken, controllers.CategoryController{}.DeleteCategory)
+		ctr := new(controllers.CategoryController)
+		category.POST("/create", middleware.ValidateToken, ctr.CreateCategory)
+		category.POST("/update", middleware.ValidateToken, ctr.UpdateCategory)
+		category.GET(":id", middleware.ValidateToken, ctr.GetCategoryById)
+		category.GET("/list", middleware.ValidateToken, ctr.GetCateGoryList)
+		category.DELETE(":id", middleware.ValidateToken, ctr.DeleteCategory)
 	}
 
 	article := router.Group("/article")
 	{
-		article.POST("/create", middleware.ValidateToken, controllers.ArticleController{}.CreateArticle)
-		article.GET(":id", middleware.ValidateToken, controllers.ArticleController{}.GetArticleById)
-		article.GET("/search", middleware.ValidateToken, controllers.ArticleController{}.GetArticleByKeyword)
-		article.GET("/list", middleware.ValidateToken, controllers.ArticleController{}.GetArticleList)
-		article.POST("/update", middleware.ValidateToken, controllers.ArticleController{}.UpdateArticle)
-		article.DELETE(":id", middleware.ValidateToken, controllers.ArticleController{}.DeleteArticle)
+		ctr := new(controllers.ArticleController)
+		article.POST("/create", middleware.ValidateToken, ctr.CreateArticle)
+		article.GET(":id", middleware.ValidateToken, ctr.GetArticleById)
+		article.GET("/search", middleware.ValidateToken, ctr.GetArticleByKeyword)
+		article.GET("/list", middleware.ValidateToken, ctr.GetArticleList)
+		article.POST("/update", middleware.ValidateToken, ctr.UpdateArticle)
+		article.DELETE(":id", middleware.ValidateToken, ctr.DeleteArticle)
 	}
 
 	comment := router.Group("/comment")
 	{
-		comment.POST("/create", middleware.ValidateToken, controllers.CommentController{}.CreateComment)
-		comment.DELETE(":id", middleware.ValidateToken, controllers.CommentController{}.DeleteComment)
+		ctr := new(controllers.CommentController)
+		comment.POST("/create", middleware.ValidateToken, ctr.CreateComment)
+		comment.DELETE(":id", middleware.ValidateToken, ctr.DeleteComment)
 	}
 
 	tag := router.Group("/tag")
