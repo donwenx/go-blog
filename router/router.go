@@ -58,5 +58,15 @@ func Router() *gin.Engine {
 		tag.POST("/update", middleware.ValidateToken, ctr.UpdateTag)
 		tag.DELETE(":id", middleware.ValidateToken, ctr.DeleteTag)
 	}
+
+	upload := router.Group("/upload")
+	{
+		ctr := new(controllers.UploadController)
+		upload.POST("/create", middleware.ValidateToken, ctr.CreateUpload)
+		upload.GET("/:id", middleware.ValidateToken, ctr.GetUploadById)
+		upload.GET("/download/:id", middleware.ValidateToken, ctr.Download)
+		upload.DELETE("/:id", middleware.ValidateToken, ctr.DeleteUpload)
+	}
+
 	return router
 }
