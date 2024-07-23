@@ -28,7 +28,7 @@ type CreateArticleDto struct {
 }
 
 type UpdateArticleDto struct {
-	Id           int64  `json:"id"`
+	Id           int64  `json:"id" bind:"required"`
 	Uid          int64  `json:"uid"`
 	Cid          int64  `json:"cid"`
 	Title        string `json:"title"`

@@ -149,29 +149,24 @@ func (a ArticleController) GetArticleList(c *gin.Context) {
 
 // 更新
 func (a ArticleController) UpdateArticle(c *gin.Context) {
-	idStr := c.DefaultPostForm("id", "0")
-	cidStr := c.DefaultPostForm("cid", "0")
-	id, _ := strconv.ParseInt(idStr, 10, 64)
-	cid, _ := strconv.ParseInt(cidStr, 10, 64)
-	title := c.DefaultPostForm("title", "")
-	cover := c.DefaultPostForm("cover", "")
-	content := c.DefaultPostForm("content", "")
-	if id == 0 {
-		ReturnError(c, errcode.ErrInvalidRequest, "请输入正确信息")
+	param := model.UpdateArticleDto{}
+	err := c.ShouldBind(&param)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "绑定失败"+err.Error())
 		return
 	}
-	article, _ := model.GetArticleById(id)
+	article, _ := model.GetArticleById(param.Id)
 	if article.Id == 0 {
 		ReturnError(c, errcode.ErrInvalidRequest, "文章不存在")
 		return
 	}
 	// 更新数据库
-	article, err := model.UpdateArticle(&model.UpdateArticleDto{
-		Id:      id,
-		Cid:     cid,
-		Title:   title,
-		Cover:   cover,
-		Content: content,
+	article, err = model.UpdateArticle(&model.UpdateArticleDto{
+		Id:      param.Id,
+		Cid:     param.Cid,
+		Title:   param.Title,
+		Cover:   param.Cover,
+		Content: param.Content,
 	})
 	if err != nil {
 		ReturnError(c, errcode.ErrInvalidRequest, "更新失败")
