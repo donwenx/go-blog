@@ -76,34 +76,18 @@ func (a ArticleController) CreateArticle(c *gin.Context) {
 		}
 	}
 	// 查文章
-	article, _ = model.GetArticleById(article.Id)
-	// 查用户
-	user, _ := model.GetUserInfoById(param.Uid)
-	// 查分类
-	category, _ := model.GetCategoryById(param.Cid)
-	// 查tag
-	tagRelation, _ := model.GetTagRelationByArticleId(article.Id)
-	tag := make([]model.Tag, len(tagRelation))
-	for k := range tagRelation {
-		tag[k], _ = model.GetTagById(tagRelation[k].TagId)
+	article, err = model.GetArticleById(article.Id)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+		return
 	}
 
-	userResp := User{Id: user.Id, Avatar: user.Avatar, Username: user.Username, Authority: user.Authority}
-	categoryResp := Category{Id: category.Id, Name: category.Name}
-	tagResp := make([]Tag, len(tag))
-	for k := range tag {
-		tagResp[k] = Tag{Id: tag[k].Id, Name: tag[k].Name}
+	response, err := CreateArticleResponse(&article)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+		return
 	}
-
-	response := ArticleResponse{
-		User:     userResp,
-		Category: categoryResp,
-		Title:    article.Title,
-		Cover:    article.Cover,
-		Content:  article.Content,
-		Tag:      tagResp,
-	}
-	ReturnSuccess(c, 0, "创建成功", response)
+	ReturnSuccess(c, 0, "成功", response)
 }
 
 // 查找id
@@ -119,7 +103,12 @@ func (a ArticleController) GetArticleById(c *gin.Context) {
 		ReturnError(c, errcode.ErrInvalidRequest, "查找失败")
 		return
 	}
-	ReturnSuccess(c, 0, "查找成功", article)
+	response, err := CreateArticleResponse(&article)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+		return
+	}
+	ReturnSuccess(c, 0, "成功", response)
 }
 
 // 查找keyword
@@ -134,7 +123,16 @@ func (a ArticleController) GetArticleByKeyword(c *gin.Context) {
 		ReturnError(c, errcode.ErrInvalidRequest, "查找失败")
 		return
 	}
-	ReturnSuccess(c, 0, "查找成功", article)
+
+	response := make([]*ArticleResponse, len(article))
+	for k := range article {
+		response[k], err = CreateArticleResponse(&article[k])
+		if err != nil {
+			ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+			return
+		}
+	}
+	ReturnSuccess(c, 0, "查找成功", response)
 }
 
 // 查找列表
@@ -144,7 +142,16 @@ func (a ArticleController) GetArticleList(c *gin.Context) {
 		ReturnError(c, errcode.ErrInvalidRequest, "查找失败")
 		return
 	}
-	ReturnSuccess(c, 0, "查找成功", article)
+
+	response := make([]*ArticleResponse, len(article))
+	for k := range article {
+		response[k], err = CreateArticleResponse(&article[k])
+		if err != nil {
+			ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+			return
+		}
+	}
+	ReturnSuccess(c, 0, "查找成功", response)
 }
 
 // 更新
@@ -172,7 +179,12 @@ func (a ArticleController) UpdateArticle(c *gin.Context) {
 		ReturnError(c, errcode.ErrInvalidRequest, "更新失败")
 		return
 	}
-	ReturnSuccess(c, 0, "更新成功", article)
+	response, err := CreateArticleResponse(&article)
+	if err != nil {
+		ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+		return
+	}
+	ReturnSuccess(c, 0, "成功", response)
 }
 
 // 删除
@@ -197,4 +209,47 @@ func (a ArticleController) DeleteArticle(c *gin.Context) {
 		return
 	}
 	ReturnSuccess(c, 0, "删除成功", "")
+}
+
+func CreateArticleResponse(data *model.Article) (*ArticleResponse, error) {
+
+	// 查用户
+	user, err := model.GetUserInfoById(data.Uid)
+	if err != nil {
+		return nil, err
+	}
+	// 查分类
+	category, err := model.GetCategoryById(data.Cid)
+	if err != nil {
+		return nil, err
+	}
+	// 查tag
+	tagRelation, err := model.GetTagRelationByArticleId(data.Id)
+	if err != nil {
+		return nil, err
+	}
+	tag := make([]model.Tag, len(tagRelation))
+	for k := range tagRelation {
+		tag[k], err = model.GetTagById(tagRelation[k].TagId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	userResp := User{Id: user.Id, Avatar: user.Avatar, Username: user.Username, Authority: user.Authority}
+	categoryResp := Category{Id: category.Id, Name: category.Name}
+	tagResp := make([]Tag, len(tag))
+	for k := range tag {
+		tagResp[k] = Tag{Id: tag[k].Id, Name: tag[k].Name}
+	}
+
+	response := &ArticleResponse{
+		User:     userResp,
+		Category: categoryResp,
+		Title:    data.Title,
+		Cover:    data.Cover,
+		Content:  data.Content,
+		Tag:      tagResp,
+	}
+	return response, nil
 }
