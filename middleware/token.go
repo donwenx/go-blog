@@ -36,6 +36,7 @@ func ValidateToken(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
+	ctx.Set("userId", token.Uid)
 
 	ctx.Next()
 }

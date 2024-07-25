@@ -28,14 +28,15 @@ type CreateArticleDto struct {
 }
 
 type UpdateArticleDto struct {
-	Id           int64  `json:"id" bind:"required"`
-	Uid          int64  `json:"uid"`
-	Cid          int64  `json:"cid"`
-	Title        string `json:"title"`
-	Cover        string `json:"cover"`
-	Content      string `json:"context"`
-	AllowComment int    `json:"allowComment"`
-	State        int    `json:"state"`
+	Id           int64   `json:"id" bind:"required"`
+	Uid          int64   `json:"uid"`
+	Cid          int64   `json:"cid"`
+	Title        string  `json:"title"`
+	Cover        string  `json:"cover"`
+	Content      string  `json:"context"`
+	AllowComment int     `json:"allowComment"`
+	TagId        []int64 `json:"tagId"`
+	State        int     `json:"state"`
 }
 
 func (Article) TableName() string {

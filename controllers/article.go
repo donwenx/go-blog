@@ -16,7 +16,7 @@ type CreateArticleRequest struct {
 	Title   string  `json:"title" binding:"required"`
 	Cover   string  `json:"cover" binding:"required"`
 	Content string  `json:"content" binding:"required"`
-	TagId   []int64 `json:"tagId"`
+	TagId   []int64 `json:"tagId" binding:"required"`
 }
 
 type Category struct {
@@ -37,12 +37,14 @@ type Tag struct {
 }
 
 type ArticleResponse struct {
+	Id       int64    `json:"id"`
 	User     User     `json:"user"`
 	Category Category `json:"category"`
 	Title    string   `json:"title"`
 	Cover    string   `json:"cover"`
 	Content  string   `json:"context"`
 	Tag      []Tag    `json:"tag"`
+	Like     int64    `json:"like"`
 }
 
 // 创建
@@ -68,6 +70,7 @@ func (a ArticleController) CreateArticle(c *gin.Context) {
 		_, err := model.CreateTagRelation(&model.CreateTagRelationDto{
 			ArticleId: article.Id,
 			TagId:     param.TagId[k],
+			State:     model.Valid,
 		})
 
 		if err != nil {
@@ -84,7 +87,7 @@ func (a ArticleController) CreateArticle(c *gin.Context) {
 
 	response, err := CreateArticleResponse(&article)
 	if err != nil {
-		ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+		ReturnError(c, errcode.ErrInvalidRequest, "查找失败")
 		return
 	}
 	ReturnSuccess(c, 0, "成功", response)
@@ -105,7 +108,7 @@ func (a ArticleController) GetArticleById(c *gin.Context) {
 	}
 	response, err := CreateArticleResponse(&article)
 	if err != nil {
-		ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+		ReturnError(c, errcode.ErrInvalidRequest, "查找失败"+err.Error())
 		return
 	}
 	ReturnSuccess(c, 0, "成功", response)
@@ -167,6 +170,26 @@ func (a ArticleController) UpdateArticle(c *gin.Context) {
 		ReturnError(c, errcode.ErrInvalidRequest, "文章不存在")
 		return
 	}
+
+	// 判断一下tag是否存在
+	if param.TagId != nil {
+		for k := range param.TagId {
+			tag, err := model.GetTagById(param.TagId[k])
+			if err != nil || tag.State != model.Valid {
+				ReturnError(c, errcode.ErrInvalidRequest, "tag不存在"+err.Error())
+				return
+			}
+		}
+		// 更新tag关系表
+		for k := range param.TagId {
+			tag, err := model.CreateTagRelation(&model.CreateTagRelationDto{ArticleId: param.Id, TagId: param.TagId[k], State: model.Valid})
+			if err != nil || tag.State != model.Valid {
+				ReturnError(c, errcode.ErrInvalidRequest, "更新tag失败"+err.Error())
+				return
+			}
+		}
+	}
+
 	// 更新数据库
 	article, err = model.UpdateArticle(&model.UpdateArticleDto{
 		Id:      param.Id,
@@ -176,12 +199,12 @@ func (a ArticleController) UpdateArticle(c *gin.Context) {
 		Content: param.Content,
 	})
 	if err != nil {
-		ReturnError(c, errcode.ErrInvalidRequest, "更新失败")
+		ReturnError(c, errcode.ErrInvalidRequest, "更新失败"+err.Error())
 		return
 	}
 	response, err := CreateArticleResponse(&article)
 	if err != nil {
-		ReturnError(c, errcode.ErrInvalidRequest, "创建失败")
+		ReturnError(c, errcode.ErrInvalidRequest, "更新失败"+err.Error())
 		return
 	}
 	ReturnSuccess(c, 0, "成功", response)
@@ -243,13 +266,21 @@ func CreateArticleResponse(data *model.Article) (*ArticleResponse, error) {
 		tagResp[k] = Tag{Id: tag[k].Id, Name: tag[k].Name}
 	}
 
+	// 查like表
+	like, err := model.GetLikeCount(&model.GetLikeCountDto{LikeId: data.Id, Type: "article"})
+	if err != nil {
+		return nil, err
+	}
+
 	response := &ArticleResponse{
+		Id:       data.Id,
 		User:     userResp,
 		Category: categoryResp,
 		Title:    data.Title,
 		Cover:    data.Cover,
 		Content:  data.Content,
 		Tag:      tagResp,
+		Like:     like,
 	}
 	return response, nil
 }

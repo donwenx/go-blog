@@ -15,6 +15,7 @@ var (
 
 func init() {
 	Db, err = gorm.Open(mysql.Open(config.Mysql), &gorm.Config{})
+	Db = Db.Debug()
 
 	if err != nil {
 		logrus.WithError(err).Error("database error")
