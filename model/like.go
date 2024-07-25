@@ -21,8 +21,8 @@ func (Like) TableName() string {
 
 type CreateLikeDto struct {
 	Uid    int64  `json:"uid"`
-	LikeId int64  `json:"likeId"`
-	Type   string `json:"type"` // 评论，文章，(类型)
+	LikeId int64  `json:"id" binding:"required" uri:"id"`
+	Type   string `json:"type" binding:"required" uri:"type"` // 评论，文章，(类型)
 }
 
 func CreateLike(data *CreateLikeDto) (Like, error) {
@@ -46,12 +46,30 @@ type GetLikeCountDto struct {
 func GetLikeCount(data *GetLikeCountDto) (int64, error) {
 	like := Like{}
 	var count int64
-	err := dao.Db.Model(&like).Where("type = ? AND likeId = ?", data.LikeId, data.Type).Count(&count).Error
+	err := dao.Db.Model(&like).Where("type = ? AND like_id = ? AND state = ?", data.Type, data.LikeId, Valid).Count(&count).Error
 	return count, err
 }
 
+type GetLikeByIdDto struct {
+	Uid    int64  `binding:"required"` // user id
+	LikeId int64  `binding:"required"` // like id
+	Type   string `binding:"required"` // article or comment
+}
+
+func GetLikeByLikeId(data *GetLikeByIdDto) (Like, error) {
+	like := Like{}
+	err := dao.Db.Where("id = ? AND like_id = ? AND type = ? ", data.Uid, data.LikeId, data.Type).First(&like).Error
+	return like, err
+}
+
+func GetLikeByUserId(data *GetLikeByIdDto) (Like, error) {
+	like := Like{}
+	err := dao.Db.Where("uid = ? AND like_id = ? AND type = ? ", data.Uid, data.LikeId, data.Type).Find(&like).Error
+	return like, err
+}
+
 type UpdateLikeDto struct {
-	Id    int64 `json:"id"`
+	Id    int64 `json:"id" binding:"required" uri:"id"`
 	State int   `json:"state"`
 }
 

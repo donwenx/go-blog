@@ -68,5 +68,12 @@ func Router() *gin.Engine {
 		upload.DELETE("/:id", middleware.ValidateToken, ctr.DeleteUpload)
 	}
 
+	like := router.Group("/like")
+	{
+		ctr := new(controllers.LikeController)
+		like.POST("/:type/:id", middleware.ValidateToken, ctr.CreateLike)
+		like.DELETE("/:type/:id", middleware.ValidateToken, ctr.CancelLike)
+	}
+
 	return router
 }
